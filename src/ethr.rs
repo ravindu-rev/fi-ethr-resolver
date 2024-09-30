@@ -48,7 +48,6 @@ pub async fn build_did_doc_from_logs(
     }
 
     while block.is_earliest() || block.as_number().unwrap() < end_block.as_number().unwrap() {
-        println!("1 {:#?}", block);
         let range_end_block = match block.is_earliest() {
             true => BlockNumber::from(block_range),
             false => BlockNumber::from(block.as_number().unwrap() + block_range),
@@ -72,7 +71,6 @@ pub async fn build_did_doc_from_logs(
         }
 
         let prev_block = block.clone();
-        println!("len {}", logs.len());
 
         for log in logs {
             did.version_id = match log.block_number {
@@ -98,9 +96,6 @@ pub async fn build_did_doc_from_logs(
             false => BlockNumber::from(block.as_number().unwrap() + 1),
         };
     }
-
-    println!("{:#?}", block);
-    println!("latest {:#?}", end_block);
 
     did.finalize()
 }
