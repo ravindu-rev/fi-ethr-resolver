@@ -1,0 +1,21 @@
+name: Publish
+
+on:
+  push:
+    tags: ["*"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish-rust:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: cargo build --verbose
+      - name: Login
+        run: cargo login ${{ secrets.CARGO_API_TOKEN }}
+      - name: Publish
+        run: cargo publish
