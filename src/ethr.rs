@@ -1,5 +1,7 @@
+use ethers::abi::Abi;
+use ethers::contract::Contract;
 use ethers::providers::{Http, Middleware, Provider};
-use ethers::types::{Address, BlockNumber, Filter, Log};
+use ethers::types::{Address, BlockNumber, Filter, Log, H160, U256, U64};
 use fi_common::did::DidDocument;
 use fi_common::error::Error;
 use std::{sync::Arc, time::Duration};
@@ -12,7 +14,7 @@ use crate::events::DiDEthrChangeEvent;
 
 pub async fn build_did_doc_from_logs(
     provider_url: &str,
-    contract_address: &str,
+    address: &str,
     did_doc: &mut DidDocument,
 ) -> Result<(DidDocument, bool, Option<u64>), Error> {
     let provider_result = Provider::<Http>::try_from(provider_url);
@@ -25,16 +27,60 @@ pub async fn build_did_doc_from_logs(
 
     let client: Arc<Provider<Http>> = Arc::new(provider);
 
-    let contract_address = contract_address.parse::<Address>().unwrap();
+    let contract_address = address.parse::<Address>().unwrap();
 
-    let mut block = BlockNumber::Earliest;
-    let end_block = match client.get_block_number().await {
-        Ok(val) => BlockNumber::from(val),
-        Err(error) => return Err(Error::new(error.to_string().as_str())),
+    let mut did = DidDoc::new(did_doc, false, Some(format!("0x{}", address)));
+
+    match did.chain_id_add(&client).await {
+        Ok(_val) => {}
+        Err(error) => return Err(error),
+    }
+
+    let contract_abi = include_bytes!("contract-abi.json");
+    let contract: ethers::contract::ContractInstance<Arc<Provider<Http>>, Provider<Http>> =
+        Contract::new(
+            contract_address,
+            Abi::load(&contract_abi[..]).unwrap(),
+            client.clone(),
+        );
+
+    let logs = match get_logs(contract, contract_address, client).await {
+        Ok(val) => val,
+        Err(error) => return Err(error),
     };
-    let block_range = 10000000;
 
-    let mut did = DidDoc::new(did_doc, false, None);
+    for log in logs {
+        did.version_id = match log.block_number {
+            Some(val) => Some(val.0[0]),
+            None => None,
+        };
+
+        if !log.address.eq(&contract_address) {
+            continue;
+        }
+
+        match apply_change_to_did(&mut did, log) {
+            Ok(_val) => {}
+            Err(error) => return Err(error),
+        };
+    }
+
+    did.finalize()
+}
+
+async fn get_logs(
+    contract: ethers::contract::ContractInstance<Arc<Provider<Http>>, Provider<Http>>,
+    contract_address: H160,
+    client: Arc<Provider<Http>>,
+) -> Result<Vec<Log>, Error> {
+    let block_tag: Option<BlockNumber> = None;
+    let mut event_log = Vec::<Log>::new();
+
+    let mut previous_change_option =
+        match get_previous_change(contract, contract_address, block_tag).await {
+            Ok(val) => Some(val),
+            Err(error) => return Err(error),
+        };
 
     let event_topics = [
         DID_ATTRIBUTE_CHANGED_TOPIC,
@@ -42,62 +88,60 @@ pub async fn build_did_doc_from_logs(
         DID_OWNER_CHANGED_TOPIC,
     ];
 
-    match did.chain_id_add(&client).await {
-        Ok(_val) => {}
-        Err(error) => return Err(error),
-    }
-
-    while block.is_earliest() || block.as_number().unwrap() < end_block.as_number().unwrap() {
-        let range_end_block = match block.is_earliest() {
-            true => BlockNumber::from(block_range),
-            false => BlockNumber::from(block.as_number().unwrap() + block_range),
-        };
+    while previous_change_option.is_some() {
+        let previous_change = previous_change_option.unwrap();
 
         let filter = Filter::new()
             .address(ethers::types::ValueOrArray::Value(contract_address))
             .events(event_topics)
-            .from_block(block)
-            .to_block(range_end_block);
+            .from_block(BlockNumber::Number(previous_change.as_u64().into()))
+            .to_block(BlockNumber::Number(previous_change.as_u64().into()));
 
-        let logs = match client.get_logs(&filter).await {
+        let mut logs = match client.get_logs(&filter).await {
             Ok(val) => val,
             Err(error) => {
                 return Err(Error::new(error.to_string().as_str()));
             }
         };
 
-        if block.is_earliest() && logs.is_empty() {
-            block = BlockNumber::from(block_range);
-        }
+        logs.reverse();
+        previous_change_option = None;
 
-        let prev_block = block.clone();
-
-        for log in logs {
-            did.version_id = match log.block_number {
-                Some(val) => Some(val.0[0]),
-                None => None,
-            };
-
-            match apply_change_to_did(&mut did, log) {
-                Ok(_val) => {}
-                Err(error) => return Err(error),
-            };
-
-            match did.version_id {
-                Some(val) => {
-                    block = BlockNumber::from(val);
-                }
-                None => {}
+        logs.iter().for_each(|log| {
+            event_log.insert(0, log.clone());
+            if log
+                .block_number
+                .is_some_and(|block_number| block_number.as_u64() < previous_change.as_u64())
+            {
+                previous_change_option = Some(log.block_number.unwrap().into());
             }
-        }
-
-        block = match prev_block.eq(&block) {
-            true => BlockNumber::from(block.as_number().unwrap() + block_range),
-            false => BlockNumber::from(block.as_number().unwrap() + 1),
-        };
+        });
     }
 
-    did.finalize()
+    Ok(event_log)
+}
+
+async fn get_previous_change(
+    contract: ethers::contract::ContractInstance<Arc<Provider<Http>>, Provider<Http>>,
+    address: H160,
+    block_tag: Option<BlockNumber>,
+) -> Result<U64, Error> {
+    let call = match contract.method::<_, U256>("changed", address) {
+        Ok(val) => {
+            val.block(match block_tag {
+                Some(val) => val,
+                None => BlockNumber::Latest,
+            })
+            .call()
+            .await
+        }
+        Err(error) => return Err(Error::new(error.to_string().as_str())),
+    };
+
+    match call {
+        Ok(val) => Ok(val.as_u64().into()),
+        Err(error) => return Err(Error::new(error.to_string().as_str())),
+    }
 }
 
 fn apply_change_to_did(did_doc: &mut DidDoc, log: Log) -> Result<(), Error> {

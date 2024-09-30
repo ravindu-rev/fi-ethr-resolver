@@ -6,7 +6,10 @@ use fi_common::{did::DidDocument, keys::KeyPair};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::verification::ECDSA_SECP256K1_RECOVERY_METHOD2020;
+use crate::util::{get_public_key, strip0x};
+use crate::verification::{
+    ECDSA_SECP256K1_RECOVERY_METHOD2020, ECDSA_SECP256K1_VERIFICATION_KEY2019,
+};
 
 pub struct DidDoc {
     pub doc: DidDocument,
@@ -79,7 +82,48 @@ impl DidDoc {
             .assertion_method
             .push(format!("{}#controller", self.doc.id.clone()));
 
-        // Add controller key
+        match get_public_key(self.doc.id.clone()) {
+            Some(controller_key_val) => {
+                let did = String::from(self.doc.id.clone().split("?").collect::<Vec<&str>>()[0]);
+
+                let components = did.split(":").collect::<Vec<&str>>();
+                let address: String = String::from(components[components.len() - 1]);
+                if self
+                    .controller
+                    .clone()
+                    .is_some_and(|controller| controller.eq(&address))
+                {
+                    let controller_key = KeyPair {
+                        _type: String::from(ECDSA_SECP256K1_VERIFICATION_KEY2019),
+                        blockchain_account_id: None,
+                        id: Some(format!("{}#controllerKey", self.doc.id.clone())),
+                        context: None,
+                        public_key_base58: None,
+                        private_key_base58: None,
+                        public_key_multibase: None,
+                        private_key_multibase: None,
+                        revoked: false,
+                        controller: Some(self.doc.id.clone()),
+                        public_key_hex: None,
+                        public_key_base64: None,
+                        public_key_pem: None,
+                        private_key_hex: Some(strip0x(controller_key_val)),
+                        private_key_base64: None,
+                        private_key_pem: None,
+                        value: None,
+                    };
+
+                    public_keys.push(controller_key);
+                    self.doc
+                        .authentication
+                        .push(format!("{}#controllerKey", self.doc.id.clone()));
+                    self.doc
+                        .assertion_method
+                        .push(format!("{}#controllerKey", self.doc.id.clone()));
+                }
+            }
+            None => {}
+        };
 
         let mut signing_refs = self
             .signing_refs

@@ -1042,9 +1042,9 @@ dependencies = [
 
 [[package]]
 name = "fi-common"
-version = "0.0.7"
+version = "0.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e87cc3c38f12907bc70380a80ba7b1880d921ebe6e6b1d9a48e03561a2acd7c4"
+checksum = "1c2a3b220c529756a16f3920fbf76e17186b2bc5ed911d19170bee586c48ee64"
 dependencies = [
  "console_error_panic_hook",
  "serde",
@@ -1064,6 +1064,7 @@ dependencies = [
  "hex",
  "phf",
  "regex",
+ "secp256k1",
  "serde",
  "serde_json",
  "tokio",
@@ -2539,6 +2540,24 @@ dependencies = [
  "pkcs8",
  "subtle",
  "zeroize",
+]
+
+[[package]]
+name = "secp256k1"
+version = "0.29.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9465315bc9d4566e1724f0fffcbcc446268cb522e60f9a27bcded6b19c108113"
+dependencies = [
+ "secp256k1-sys",
+]
+
+[[package]]
+name = "secp256k1-sys"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4387882333d3aa8cb20530a17c69a3752e97837832f34f6dccc760e715001d9"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
