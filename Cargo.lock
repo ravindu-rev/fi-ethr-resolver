@@ -1055,7 +1055,7 @@ dependencies = [
 
 [[package]]
 name = "fi-ethr-resolver"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "base64 0.22.1",
  "bs58",

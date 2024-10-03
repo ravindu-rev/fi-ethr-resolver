@@ -1,6 +1,6 @@
 [package]
 name = "fi-ethr-resolver"
-version = "0.0.1"
+version = "0.0.2"
 repository = "https://github.com/ravindu-rev/fi-ethr-resolver"
 authors = ["Ravindu Wijegunawardhana <ravindu.w@fidenz.com>"]
 description = "Ethereum did resolver for Rust"
