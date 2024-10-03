@@ -42,8 +42,6 @@ pub async fn d() {
         "https://w3id.org/security/suites/secp256k1recovery-2020/v2",
         "https://w3id.org/security/v3-unstable"
       ],
-      "capabilityDelegation":[],
-      "capabilityInvocation":[],
       "keyAgreement":[],
       "services":[]
     })) {
