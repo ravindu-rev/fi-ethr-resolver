@@ -1,6 +1,6 @@
 [package]
 name = "fi-ethr-resolver"
-version = "0.0.2"
+version = "0.0.3"
 repository = "https://github.com/ravindu-rev/fi-ethr-resolver"
 authors = ["Ravindu Wijegunawardhana <ravindu.w@fidenz.com>"]
 description = "Ethereum did resolver for Rust"
@@ -14,7 +14,7 @@ crate-type = ["cdylib", "rlib"]
 base64 = "0.22.1"
 bs58 = "0.5.1"
 ethers = "2.0.14"
-fi-common = "0.0.9"
+fi-common = "0.1.0"
 hex = "0.4.3"
 phf = { version = "0.11.2", features = ["macros", "phf_macros"] }
 regex = "1.10.6"

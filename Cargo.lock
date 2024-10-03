@@ -1042,9 +1042,9 @@ dependencies = [
 
 [[package]]
 name = "fi-common"
-version = "0.0.9"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be4e5917f9cee76120e2fece6caf48ece50b7425cdcfae048a613661dc82b45"
+checksum = "bb0ed87c8ac7c8b436f3272e12f078c5310624f3c97d027c203f16d51f53bdff"
 dependencies = [
  "console_error_panic_hook",
  "serde",
@@ -1055,7 +1055,7 @@ dependencies = [
 
 [[package]]
 name = "fi-ethr-resolver"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "base64 0.22.1",
  "bs58",
