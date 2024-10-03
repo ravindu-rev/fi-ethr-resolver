@@ -73,6 +73,8 @@ impl DidDoc {
             private_key_base64: None,
             private_key_pem: None,
             value: None,
+            ethereum_address: None,
+            public_key_jwk: None,
         }];
 
         let mut authentication_vec: Vec<String> = match self.doc.authentication.is_none() {
@@ -129,6 +131,8 @@ impl DidDoc {
                         private_key_base64: None,
                         private_key_pem: None,
                         value: None,
+                        ethereum_address: None,
+                        public_key_jwk: None,
                     };
 
                     public_keys.push(controller_key);
