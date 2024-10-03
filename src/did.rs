@@ -64,7 +64,7 @@ impl DidDoc {
             private_key_base58: None,
             public_key_multibase: None,
             private_key_multibase: None,
-            revoked: false,
+            revoked: Some(false),
             controller: Some(self.doc.id.clone()),
             public_key_hex: None,
             public_key_base64: None,
@@ -75,12 +75,30 @@ impl DidDoc {
             value: None,
         }];
 
-        self.doc
-            .authentication
-            .push(format!("{}#controller", self.doc.id.clone()));
-        self.doc
-            .assertion_method
-            .push(format!("{}#controller", self.doc.id.clone()));
+        let mut authentication_vec: Vec<String> = match self.doc.authentication.is_none() {
+            true => Vec::new(),
+            false => self.doc.authentication.clone().take().unwrap(),
+        };
+        let mut assertion_method_vec: Vec<String> = match self.doc.assertion_method.is_none() {
+            true => Vec::new(),
+            false => self.doc.assertion_method.clone().take().unwrap(),
+        };
+        let mut verification_method_vec: Vec<KeyPair> = match self.doc.verification_method.is_none()
+        {
+            true => Vec::new(),
+            false => self.doc.verification_method.clone().take().unwrap(),
+        };
+        let mut key_agreement_vec: Vec<KeyPair> = match self.doc.key_agreement.is_none() {
+            true => Vec::new(),
+            false => self.doc.key_agreement.clone().take().unwrap(),
+        };
+        let mut services_vec: Vec<Service> = match self.doc.services.is_none() {
+            true => Vec::new(),
+            false => self.doc.services.clone().take().unwrap(),
+        };
+
+        authentication_vec.push(format!("{}#controller", self.doc.id.clone()));
+        assertion_method_vec.push(format!("{}#controller", self.doc.id.clone()));
 
         match get_public_key(self.doc.id.clone()) {
             Some(controller_key_val) => {
@@ -102,7 +120,7 @@ impl DidDoc {
                         private_key_base58: None,
                         public_key_multibase: None,
                         private_key_multibase: None,
-                        revoked: false,
+                        revoked: None,
                         controller: Some(self.doc.id.clone()),
                         public_key_hex: None,
                         public_key_base64: None,
@@ -114,12 +132,8 @@ impl DidDoc {
                     };
 
                     public_keys.push(controller_key);
-                    self.doc
-                        .authentication
-                        .push(format!("{}#controllerKey", self.doc.id.clone()));
-                    self.doc
-                        .assertion_method
-                        .push(format!("{}#controllerKey", self.doc.id.clone()));
+                    authentication_vec.push(format!("{}#controllerKey", self.doc.id.clone()));
+                    assertion_method_vec.push(format!("{}#controllerKey", self.doc.id.clone()));
                 }
             }
             None => {}
@@ -130,16 +144,14 @@ impl DidDoc {
             .clone()
             .into_values()
             .collect::<Vec<String>>();
-        self.doc.assertion_method.append(&mut signing_refs);
+        assertion_method_vec.append(&mut signing_refs);
 
         let mut authentication = self.auth.clone().into_values().collect::<Vec<String>>();
-        self.doc.authentication.append(&mut authentication);
+        authentication_vec.append(&mut authentication);
 
         let mut verification_method = self.pks.clone().into_values().collect::<Vec<KeyPair>>();
-        self.doc.verification_method.append(&mut public_keys);
-        self.doc
-            .verification_method
-            .append(&mut verification_method);
+        verification_method_vec.append(&mut public_keys);
+        verification_method_vec.append(&mut verification_method);
 
         if self.services.len() > 0 {
             let mut services = self
@@ -147,7 +159,7 @@ impl DidDoc {
                 .clone()
                 .into_values()
                 .collect::<Vec<Service>>();
-            self.doc.services.append(&mut services);
+            services_vec.append(&mut services);
         }
 
         if self.key_agreement_refs.len() > 0 {
@@ -156,21 +168,27 @@ impl DidDoc {
                 .clone()
                 .into_values()
                 .collect::<Vec<KeyPair>>();
-            self.doc.key_agreement.append(&mut key_agreement_refs);
+            key_agreement_vec.append(&mut key_agreement_refs);
         }
+
+        self.doc.authentication = Some(authentication_vec);
+        self.doc.assertion_method = Some(assertion_method_vec);
+        self.doc.verification_method = Some(verification_method_vec);
+        self.doc.key_agreement = Some(key_agreement_vec);
+        self.doc.services = Some(services_vec);
 
         Ok((
             match self.deactivated {
                 true => DidDocument {
                     context: Vec::new(),
                     id: self.doc.id.clone(),
-                    verification_method,
-                    authentication,
-                    assertion_method: Vec::new(),
-                    capability_delegation: Vec::new(),
-                    capability_invocation: Vec::new(),
-                    key_agreement: Vec::new(),
-                    services: Vec::new(),
+                    verification_method: self.doc.verification_method.take(),
+                    authentication: self.doc.authentication.take(),
+                    assertion_method: None,
+                    capability_delegation: None,
+                    capability_invocation: None,
+                    key_agreement: None,
+                    services: None,
                 },
                 false => self.doc.clone(),
             },

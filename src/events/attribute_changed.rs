@@ -85,7 +85,7 @@ impl DiDEthrChangeEvent for DIDAttributeChanged {
                         private_key_multibase: None,
                         private_key_pem: None,
                         public_key_multibase: None,
-                        revoked: false,
+                        revoked: Some(false),
                     };
 
                     pk._type = match LEGACY_ALGO_MAP.contains_key(&pk._type) {

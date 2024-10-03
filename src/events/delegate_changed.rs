@@ -81,7 +81,7 @@ impl DiDEthrChangeEvent for DIDDelegateChanged {
                         private_key_multibase: None,
                         private_key_pem: None,
                         public_key_multibase: None,
-                        revoked: false,
+                        revoked: Some(false),
                     },
                 );
                 did_doc.signing_refs.insert(event_index, del_str);

@@ -52,13 +52,13 @@ pub async fn resolve(did: &str, provider: &str, accept: &str) -> Result<DidDocum
     let mut did_doc = DidDocument {
         context,
         id: String::from(did),
-        verification_method: Vec::new(),
-        authentication: Vec::new(),
-        assertion_method: Vec::new(),
-        capability_delegation: Vec::new(),
-        capability_invocation: Vec::new(),
-        key_agreement: Vec::new(),
-        services: Vec::new(),
+        verification_method: None,
+        authentication: None,
+        assertion_method: None,
+        capability_delegation: None,
+        capability_invocation: None,
+        key_agreement: None,
+        services: None,
     };
 
     let (created_did_doc, _deactivated, _version_id) =

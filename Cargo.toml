@@ -14,7 +14,7 @@ crate-type = ["cdylib", "rlib"]
 base64 = "0.22.1"
 bs58 = "0.5.1"
 ethers = "2.0.14"
-fi-common = "0.0.8"
+fi-common = "0.0.9"
 hex = "0.4.3"
 phf = { version = "0.11.2", features = ["macros", "phf_macros"] }
 regex = "1.10.6"
