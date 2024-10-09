@@ -18,7 +18,7 @@ fi-common = "0.0.9"
 hex = "0.4.3"
 phf = { version = "0.11.2", features = ["macros", "phf_macros"] }
 regex = "1.10.6"
-secp256k1 = "0.29.1"
+secp256k1 = "0.30.0"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
 tokio = { version = "1.40.0", features = ["full"] }
