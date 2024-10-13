@@ -1055,12 +1055,13 @@ dependencies = [
 
 [[package]]
 name = "fi-ethr-resolver"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "base64 0.22.1",
  "bs58",
  "ethers",
  "fi-common",
+ "getrandom",
  "hex",
  "regex",
  "secp256k1",
@@ -1264,8 +1265,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4567c8db10ae91089c99af84c68c38da3ec2f087c3f82960bcdbf3656b6f4d7"
 dependencies = [
  "cfg-if",
+ "js-sys",
  "libc",
  "wasi",
+ "wasm-bindgen",
 ]
 
 [[package]]
