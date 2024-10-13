@@ -1055,14 +1055,13 @@ dependencies = [
 
 [[package]]
 name = "fi-ethr-resolver"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "base64 0.22.1",
  "bs58",
  "ethers",
  "fi-common",
  "hex",
- "phf",
  "regex",
  "secp256k1",
  "serde",

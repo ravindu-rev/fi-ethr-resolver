@@ -4,7 +4,7 @@ use super::DiDEthrChangeEvent;
 use crate::{
     did::DidDoc,
     util::{encode_base58, encode_base64, remove_zero_bytes, strip0x},
-    verification::LEGACY_ALGO_MAP,
+    verification::get_legacy_algo,
 };
 use ethers::{
     contract::EthEvent,
@@ -90,8 +90,8 @@ impl DiDEthrChangeEvent for DIDAttributeChanged {
                         public_key_jwk: None,
                     };
 
-                    pk._type = match LEGACY_ALGO_MAP.contains_key(&pk._type) {
-                        true => String::from(*LEGACY_ALGO_MAP.get(&pk._type).unwrap()),
+                    pk._type = match get_legacy_algo().contains_key(&pk._type.as_str()) {
+                        true => String::from(*get_legacy_algo().get(&pk._type.as_str()).unwrap()),
                         false => String::from(algorithm),
                     };
 
