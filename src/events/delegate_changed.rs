@@ -84,6 +84,7 @@ impl DiDEthrChangeEvent for DIDDelegateChanged {
                         revoked: Some(false),
                         ethereum_address: None,
                         public_key_jwk: None,
+                        private_key_jwk: None,
                     },
                 );
                 did_doc.signing_refs.insert(event_index, del_str);
