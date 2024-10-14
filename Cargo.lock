@@ -1042,9 +1042,9 @@ dependencies = [
 
 [[package]]
 name = "fi-common"
-version = "0.1.2"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95dbcd37a89a734f25e8b6bab1f1ecd11d1cd29943479c9ee5a2aa418fff5da8"
+checksum = "7cfb19caeb6a617e944dc40b7f8da7c44395b856efee62089e4cfff9be8126c1"
 dependencies = [
  "console_error_panic_hook",
  "serde",
