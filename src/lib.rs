@@ -1,6 +1,9 @@
+use std::str::FromStr;
+
 use ethr::build_did_doc_from_logs;
 use fi_common::{did::DidDocument, error::Error};
 use regex::Regex;
+use serde_json::Value;
 use util::strip0x;
 
 mod did;
@@ -10,12 +13,12 @@ mod util;
 mod verification;
 
 pub async fn resolve(did: &str, provider: &str, accept: &str) -> Result<DidDocument, Error> {
-    let context: Vec<String> = match accept {
+    let context: Vec<Value> = match accept {
         "application/did+json" => Vec::new(),
         "application/did+ld+json" => Vec::from([
-            String::from("https://www.w3.org/ns/did/v1"),
-            String::from("https://w3id.org/security/suites/secp256k1recovery-2020/v2"),
-            String::from("https://w3id.org/security/v3-unstable"),
+            Value::from_str("https://www.w3.org/ns/did/v1").unwrap(),
+            Value::from_str("https://w3id.org/security/suites/secp256k1recovery-2020/v2").unwrap(),
+            Value::from_str("https://w3id.org/security/v3-unstable").unwrap(),
         ]),
         _ => {
             return Err(Error::new(
