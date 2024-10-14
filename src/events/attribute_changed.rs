@@ -88,6 +88,7 @@ impl DiDEthrChangeEvent for DIDAttributeChanged {
                         revoked: Some(false),
                         ethereum_address: None,
                         public_key_jwk: None,
+                        private_key_jwk: None,
                     };
 
                     pk._type = match get_legacy_algo().contains_key(&pk._type.as_str()) {

@@ -133,6 +133,7 @@ impl DidDoc {
                         value: None,
                         ethereum_address: None,
                         public_key_jwk: None,
+                        private_key_jwk: None,
                     };
 
                     public_keys.push(controller_key);
