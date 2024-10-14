@@ -75,6 +75,7 @@ impl DidDoc {
             value: None,
             ethereum_address: None,
             public_key_jwk: None,
+            private_key_jwk: None,
         }];
 
         let mut authentication_vec: Vec<String> = match self.doc.authentication.is_none() {
