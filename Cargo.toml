@@ -18,7 +18,7 @@ fi-common = "0.1.1"
 hex = "0.4.3" 
 regex = "1.10.6"
 secp256k1 = "0.29.1"
-serde = { version = "1.0.210", features = ["derive"] }
+serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.128" 
 getrandom = { version = "0.2", features = ["js"] }
 
